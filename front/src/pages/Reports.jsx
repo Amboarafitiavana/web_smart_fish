@@ -2,50 +2,31 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FiFileText, FiDownload, FiCalendar, FiBarChart } from 'react-icons/fi'
 import Button from '../components/ui/Button'
-
-const REPORTS = [
-  {
-    id: 'daily',
-    title: 'Daily Report',
-    description: 'Sensor readings, alerts, and device status for the last 24 hours.',
-    icon: FiFileText,
-    accent: '#17C7E0',
-    meta: 'Generated automatically at 23:59',
-  },
-  {
-    id: 'weekly',
-    title: 'Weekly Report',
-    description: 'Trends, averages, and alert summary across the past 7 days.',
-    icon: FiCalendar,
-    accent: '#2F7BFF',
-    meta: 'Generated every Monday',
-  },
-  {
-    id: 'monthly',
-    title: 'Monthly Report',
-    description: 'Full analytics breakdown with pond-by-pond comparisons.',
-    icon: FiBarChart,
-    accent: '#10B981',
-    meta: 'Generated on the 1st of each month',
-  },
-]
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Reports() {
+  const { t } = useLanguage()
   const [downloading, setDownloading] = useState(null)
+
+  const REPORTS = [
+    { id: 'daily', title: t('reportsPage.dailyReport'), description: t('reportsPage.dailyDesc'), icon: FiFileText, accent: '#17C7E0', meta: t('reportsPage.dailyMeta') },
+    { id: 'weekly', title: t('reportsPage.weeklyReport'), description: t('reportsPage.weeklyDesc'), icon: FiCalendar, accent: '#2F7BFF', meta: t('reportsPage.weeklyMeta') },
+    { id: 'monthly', title: t('reportsPage.monthlyReport'), description: t('reportsPage.monthlyDesc'), icon: FiBarChart, accent: '#10B981', meta: t('reportsPage.monthlyMeta') },
+  ]
 
   const handleDownload = (report) => {
     setDownloading(report.id)
     setTimeout(() => {
       setDownloading(null)
-      toast.success(`${report.title} downloaded`)
+      toast.success(t('reportsPage.downloaded', { title: report.title }))
     }, 900)
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">Reports</h1>
-        <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">Download summaries of your farm's water quality data</p>
+        <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">{t('reportsPage.title')}</h1>
+        <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">{t('reportsPage.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -64,24 +45,24 @@ export default function Reports() {
               loading={downloading === report.id}
               onClick={() => handleDownload(report)}
             >
-              Download PDF
+              {t('reportsPage.downloadPdf')}
             </Button>
           </div>
         ))}
       </div>
 
       <div className="panel p-6">
-        <h3 className="font-display text-base font-semibold text-abyss-900 dark:text-mist-50">Custom Report</h3>
-        <p className="mt-1.5 text-sm text-abyss-500 dark:text-mist-200/50">Build a report for a specific pond, sensor, and date range.</p>
+        <h3 className="font-display text-base font-semibold text-abyss-900 dark:text-mist-50">{t('reportsPage.customReport')}</h3>
+        <p className="mt-1.5 text-sm text-abyss-500 dark:text-mist-200/50">{t('reportsPage.customReportDesc')}</p>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
           <select className="rounded-xl border border-mist-200 dark:border-abyss-600 bg-mist-50 dark:bg-abyss-800 px-3.5 py-2.5 text-sm text-abyss-800 dark:text-mist-50 outline-none">
-            <option>All Ponds</option>
+            <option>{t('reportsPage.allPonds')}</option>
             <option>Pond A — Tilapia</option>
             <option>Pond B — Catfish</option>
             <option>Pond C — Nursery</option>
           </select>
           <select className="rounded-xl border border-mist-200 dark:border-abyss-600 bg-mist-50 dark:bg-abyss-800 px-3.5 py-2.5 text-sm text-abyss-800 dark:text-mist-50 outline-none">
-            <option>All Sensors</option>
+            <option>{t('reportsPage.allSensors')}</option>
             <option>Water Temperature</option>
             <option>Water pH</option>
             <option>Turbidity</option>
@@ -89,8 +70,8 @@ export default function Reports() {
             <option>Water Level</option>
           </select>
           <input type="date" className="rounded-xl border border-mist-200 dark:border-abyss-600 bg-mist-50 dark:bg-abyss-800 px-3.5 py-2.5 text-sm text-abyss-800 dark:text-mist-50 outline-none" />
-          <Button icon={FiFileText} onClick={() => toast.success('Custom report queued')}>
-            Generate
+          <Button icon={FiFileText} onClick={() => toast.success(t('reportsPage.reportQueued'))}>
+            {t('reportsPage.generate')}
           </Button>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiMenu, FiBell, FiSun, FiMoon, FiLogOut, FiUser, FiSettings } from 'react-icons/fi'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLanguage } from '../../contexts/LanguageContext'
 import SearchInput from '../ui/SearchInput'
 import ConnectionStatusBadge from './ConnectionStatusBadge'
 import { ALERTS, USER } from '../../utils/mockData'
@@ -10,6 +11,7 @@ import { ALERTS, USER } from '../../utils/mockData'
 export default function Navbar({ onOpenMobileSidebar }) {
   const { theme, toggleTheme } = useTheme()
   const { logout } = useAuth()
+  const { t } = useLanguage()
   const [search, setSearch] = useState('')
   const [notifOpen, setNotifOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -37,7 +39,7 @@ export default function Navbar({ onOpenMobileSidebar }) {
       </button>
 
       <div className="hidden flex-1 max-w-sm sm:block">
-        <SearchInput value={search} onChange={setSearch} placeholder="Search sensors, alerts, ponds…" />
+        <SearchInput value={search} onChange={setSearch} placeholder={t('navbar.searchPlaceholder')} />
       </div>
       <div className="flex-1 sm:hidden" />
 
@@ -65,7 +67,7 @@ export default function Navbar({ onOpenMobileSidebar }) {
           </button>
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-mist-200 dark:border-abyss-700 bg-white dark:bg-abyss-900 p-2 shadow-panel">
-              <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-abyss-400 dark:text-mist-200/40">Active alerts</p>
+              <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-abyss-400 dark:text-mist-200/40">{t('navbar.activeAlerts')}</p>
               {openAlerts.map((a) => (
                 <div key={a.id} className="rounded-xl px-2 py-2 hover:bg-mist-50 dark:hover:bg-abyss-800">
                   <p className="text-sm font-medium text-abyss-800 dark:text-mist-50">{a.sensor} · {a.pond}</p>
@@ -73,7 +75,7 @@ export default function Navbar({ onOpenMobileSidebar }) {
                 </div>
               ))}
               <Link to="/alerts" onClick={() => setNotifOpen(false)} className="mt-1 block rounded-xl px-2 py-2 text-center text-xs font-medium text-signal-600 dark:text-signal-400 hover:bg-mist-50 dark:hover:bg-abyss-800">
-                View all alerts
+                {t('navbar.viewAllAlerts')}
               </Link>
             </div>
           )}
@@ -91,13 +93,13 @@ export default function Navbar({ onOpenMobileSidebar }) {
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-mist-200 dark:border-abyss-700 bg-white dark:bg-abyss-900 p-1.5 shadow-panel">
               <Link to="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-abyss-700 hover:bg-mist-50 dark:text-mist-100 dark:hover:bg-abyss-800">
-                <FiUser className="h-4 w-4" /> Profile
+                <FiUser className="h-4 w-4" /> {t('navbar.profile')}
               </Link>
               <Link to="/settings" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-abyss-700 hover:bg-mist-50 dark:text-mist-100 dark:hover:bg-abyss-800">
-                <FiSettings className="h-4 w-4" /> Settings
+                <FiSettings className="h-4 w-4" /> {t('navbar.settings')}
               </Link>
               <button onClick={logout} className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-critical-500 hover:bg-critical-500/5">
-                <FiLogOut className="h-4 w-4" /> Sign out
+                <FiLogOut className="h-4 w-4" /> {t('navbar.signOut')}
               </button>
             </div>
           )}

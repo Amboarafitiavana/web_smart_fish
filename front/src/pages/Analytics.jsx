@@ -6,17 +6,20 @@ import TrendLineChart from '../components/charts/TrendLineChart'
 import TrendBarChart from '../components/charts/TrendBarChart'
 import StatusDoughnut from '../components/charts/StatusDoughnut'
 import StatCard from '../components/dashboard/StatCard'
-
-const PERIODS = [
-  { id: 'daily', label: 'Daily', points: 24, labels: (n) => Array.from({ length: n }, (_, i) => `${i}:00`) },
-  { id: 'weekly', label: 'Weekly', points: 7, labels: () => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] },
-  { id: 'monthly', label: 'Monthly', points: 30, labels: (n) => Array.from({ length: n }, (_, i) => `${i + 1}`) },
-  { id: 'yearly', label: 'Yearly', points: 12, labels: () => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] },
-]
+import { useLanguage } from '../contexts/LanguageContext'
 
 const COLORS = { temperature: '#EF4444', ph: '#2F7BFF', turbidity: '#F59E0B', oxygen: '#17C7E0', level: '#10B981' }
 
 export default function Analytics() {
+  const { t } = useLanguage()
+
+  const PERIODS = [
+    { id: 'daily', label: t('analyticsPage.periods.daily'), points: 24, labels: (n) => Array.from({ length: n }, (_, i) => `${i}:00`) },
+    { id: 'weekly', label: t('analyticsPage.periods.weekly'), points: 7, labels: () => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] },
+    { id: 'monthly', label: t('analyticsPage.periods.monthly'), points: 30, labels: (n) => Array.from({ length: n }, (_, i) => `${i + 1}`) },
+    { id: 'yearly', label: t('analyticsPage.periods.yearly'), points: 12, labels: () => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] },
+  ]
+
   const [period, setPeriod] = useState('weekly')
   const [sensorId, setSensorId] = useState('temperature')
 
@@ -31,17 +34,17 @@ export default function Analytics() {
   const trendUp = series[series.length - 1] >= series[0]
 
   const statusSegments = [
-    { label: 'Healthy', value: 68, color: '#10B981' },
-    { label: 'Caution', value: 22, color: '#F59E0B' },
-    { label: 'Critical', value: 10, color: '#EF4444' },
+    { label: t('status.healthy'), value: 68, color: '#10B981' },
+    { label: t('status.caution'), value: 22, color: '#F59E0B' },
+    { label: t('status.critical'), value: 10, color: '#EF4444' },
   ]
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">Analytics</h1>
-          <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">Trends and statistics across all sensors</p>
+          <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">{t('analyticsPage.title')}</h1>
+          <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">{t('analyticsPage.subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-xl border border-mist-200 dark:border-abyss-600 bg-white dark:bg-abyss-800 p-1">
@@ -72,17 +75,17 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Average" value={avg} unit={sensor.unit} icon={FiActivity} accent="#2F7BFF" hint={`${active.label} view`} />
-        <StatCard label="Minimum" value={min} unit={sensor.unit} icon={FiTrendingDown} accent="#17C7E0" hint="Lowest recorded" />
-        <StatCard label="Maximum" value={max} unit={sensor.unit} icon={FiTrendingUp} accent="#F59E0B" hint="Highest recorded" />
-        <StatCard label="Trend" value={trendUp ? 'Rising' : 'Falling'} icon={trendUp ? FiTrendingUp : FiTrendingDown} accent={trendUp ? '#EF4444' : '#10B981'} hint="Vs. period start" />
+        <StatCard label={t('analyticsPage.average')} value={avg} unit={sensor.unit} icon={FiActivity} accent="#2F7BFF" hint={t('analyticsPage.periodView', { period: active.label })} />
+        <StatCard label={t('analyticsPage.minimum')} value={min} unit={sensor.unit} icon={FiTrendingDown} accent="#17C7E0" hint={t('analyticsPage.lowestRecorded')} />
+        <StatCard label={t('analyticsPage.maximum')} value={max} unit={sensor.unit} icon={FiTrendingUp} accent="#F59E0B" hint={t('analyticsPage.highestRecorded')} />
+        <StatCard label={t('analyticsPage.trend')} value={trendUp ? t('analyticsPage.rising') : t('analyticsPage.falling')} icon={trendUp ? FiTrendingUp : FiTrendingDown} accent={trendUp ? '#EF4444' : '#10B981'} hint={t('analyticsPage.vsPeriodStart')} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard title={`${sensor.name} Trend`} subtitle={`${active.label} view`} className="lg:col-span-2">
+        <ChartCard title={t('analyticsPage.sensorTrend', { sensor: sensor.name })} subtitle={t('analyticsPage.periodView', { period: active.label })} className="lg:col-span-2">
           <TrendLineChart labels={labels} data={series} color={COLORS[sensorId]} unit={sensor.unit} height={280} />
         </ChartCard>
-        <ChartCard title="Reading Distribution" subtitle="Share of time in range">
+        <ChartCard title={t('analyticsPage.readingDistribution')} subtitle={t('analyticsPage.shareOfTime')}>
           <div className="flex items-center justify-center">
             <StatusDoughnut segments={statusSegments} height={180} />
           </div>
@@ -99,7 +102,7 @@ export default function Analytics() {
         </ChartCard>
       </div>
 
-      <ChartCard title="Sensor Comparison" subtitle={`Average readings this ${period.replace('ly','')}`}>
+      <ChartCard title={t('analyticsPage.sensorComparison')} subtitle={t('analyticsPage.averageReadingsThis', { period: active.label })}>
         <TrendBarChart
           labels={SENSOR_TYPES.map((s) => s.name.split(' ').slice(-1)[0])}
           data={SENSOR_TYPES.map((s) => {

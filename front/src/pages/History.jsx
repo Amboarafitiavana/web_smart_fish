@@ -7,8 +7,10 @@ import StatusBadge from '../components/ui/StatusBadge'
 import SearchInput from '../components/ui/SearchInput'
 import Button from '../components/ui/Button'
 import { useDebounce } from '../hooks/useDebounce'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function History() {
+  const { t } = useLanguage()
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   const debounced = useDebounce(search, 200)
@@ -26,28 +28,28 @@ export default function History() {
   )
 
   const columns = [
-    { key: 'id', header: 'Record ID', render: (r) => <span className="readout text-abyss-400 dark:text-mist-200/40">{r.id}</span> },
-    { key: 'date', header: 'Date & Time', render: (r) => <span className="readout">{r.date}</span> },
-    { key: 'pond', header: 'Pond' },
-    { key: 'sensor', header: 'Sensor' },
-    { key: 'value', header: 'Value', render: (r) => <span className="readout font-semibold">{r.value}</span> },
-    { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+    { key: 'id', header: t('historyPage.columnRecordId'), render: (r) => <span className="readout text-abyss-400 dark:text-mist-200/40">{r.id}</span> },
+    { key: 'date', header: t('historyPage.columnDateTime'), render: (r) => <span className="readout">{r.date}</span> },
+    { key: 'pond', header: t('historyPage.columnPond') },
+    { key: 'sensor', header: t('historyPage.columnSensor') },
+    { key: 'value', header: t('historyPage.columnValue'), render: (r) => <span className="readout font-semibold">{r.value}</span> },
+    { key: 'status', header: t('historyPage.columnStatus'), render: (r) => <StatusBadge status={r.status} /> },
   ]
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">History</h1>
-          <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">{HISTORY_ROWS.length} logged readings</p>
+          <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">{t('historyPage.title')}</h1>
+          <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">{t('historyPage.subtitle', { count: HISTORY_ROWS.length })}</p>
         </div>
-        <Button variant="ghost" icon={FiDownload} onClick={() => toast.success('Export started — check your downloads')}>
-          Export CSV
+        <Button variant="ghost" icon={FiDownload} onClick={() => toast.success(t('historyPage.exportStarted'))}>
+          {t('historyPage.exportCsv')}
         </Button>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <SearchInput value={search} onChange={setSearch} placeholder="Search by sensor or pond…" className="sm:w-72" />
+        <SearchInput value={search} onChange={setSearch} placeholder={t('historyPage.searchPlaceholder')} className="sm:w-72" />
         <div className="relative sm:w-52">
           <FiCalendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-abyss-400 dark:text-mist-200/40" />
           <input
@@ -59,12 +61,12 @@ export default function History() {
         </div>
         {dateFilter && (
           <button onClick={() => setDateFilter('')} className="text-xs font-medium text-signal-600 dark:text-signal-400">
-            Clear date
+            {t('historyPage.clearDate')}
           </button>
         )}
       </div>
 
-      <DataTable columns={columns} rows={filtered} pageSize={10} emptyMessage="No history records for this filter." />
+      <DataTable columns={columns} rows={filtered} pageSize={10} emptyMessage={t('historyPage.emptyMessage')} />
     </div>
   )
 }

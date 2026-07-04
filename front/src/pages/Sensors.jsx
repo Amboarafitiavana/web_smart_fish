@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiWifi } from 'react-icons/fi'
-import { PONDS } from '../utils/mockData'
-import { getAllSnapshots } from '../utils/mockData'
+import { PONDS, getAllSnapshots } from '../utils/mockData'
 import { SENSOR_ICONS } from '../utils/sensorIcons'
 import StatusBadge from '../components/ui/StatusBadge'
 import SearchInput from '../components/ui/SearchInput'
 import { useDebounce } from '../hooks/useDebounce'
 import { EmptyState } from '../components/ui/StateViews'
 import { SensorCardSkeleton } from '../components/ui/Loading'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Sensors() {
+  const { t } = useLanguage()
   const [search, setSearch] = useState('')
   const debounced = useDebounce(search, 200)
   const [loading] = useState(false)
@@ -30,10 +31,12 @@ export default function Sensors() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">Sensors</h1>
-          <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">{allSensors.length} sensors across {PONDS.length} ponds</p>
+          <h1 className="font-display text-xl font-semibold text-abyss-900 dark:text-mist-50">{t('sensorsPage.title')}</h1>
+          <p className="mt-1 text-sm text-abyss-500 dark:text-mist-200/50">
+            {t('sensorsPage.subtitle', { count: allSensors.length, ponds: PONDS.length })}
+          </p>
         </div>
-        <SearchInput value={search} onChange={setSearch} placeholder="Search by sensor or pond…" className="sm:w-72" />
+        <SearchInput value={search} onChange={setSearch} placeholder={t('sensorsPage.searchPlaceholder')} className="sm:w-72" />
       </div>
 
       {loading ? (
@@ -41,11 +44,11 @@ export default function Sensors() {
           {Array.from({ length: 6 }).map((_, i) => <SensorCardSkeleton key={i} />)}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState title="No sensors match your search" message="Try a different sensor name or pond." />
+        <EmptyState title={t('sensorsPage.emptyTitle')} message={t('sensorsPage.emptyMessage')} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((s, i) => (
-            <SensorDetailCard key={`${s.pond}-${s.id}`} sensor={s} delay={i * 0.03} />
+            <SensorDetailCard key={`${s.pond}-${s.id}`} sensor={s} delay={i * 0.03} t={t} />
           ))}
         </div>
       )}
@@ -53,7 +56,7 @@ export default function Sensors() {
   )
 }
 
-function SensorDetailCard({ sensor, delay }) {
+function SensorDetailCard({ sensor, delay, t }) {
   const Icon = SENSOR_ICONS[sensor.icon]
   const accent = sensor.status === 'critical' ? '#EF4444' : sensor.status === 'caution' ? '#F59E0B' : '#10B981'
 
@@ -84,17 +87,17 @@ function SensorDetailCard({ sensor, delay }) {
 
       <div className="mt-4 grid grid-cols-3 gap-2 border-t border-mist-100 dark:border-abyss-800 pt-3 text-xs">
         <div>
-          <p className="text-abyss-400 dark:text-mist-200/40">Updated</p>
+          <p className="text-abyss-400 dark:text-mist-200/40">{t('sensorsPage.updated')}</p>
           <p className="mt-0.5 font-medium text-abyss-700 dark:text-mist-100">{sensor.lastUpdate}</p>
         </div>
         <div>
-          <p className="text-abyss-400 dark:text-mist-200/40">Signal</p>
+          <p className="text-abyss-400 dark:text-mist-200/40">{t('sensorsPage.signal')}</p>
           <p className="mt-0.5 flex items-center gap-1 font-medium text-abyss-700 dark:text-mist-100">
             <FiWifi className="h-3 w-3" /> {sensor.signal}%
           </p>
         </div>
         <div>
-          <p className="text-abyss-400 dark:text-mist-200/40">Ideal Range</p>
+          <p className="text-abyss-400 dark:text-mist-200/40">{t('sensorsPage.idealRange')}</p>
           <p className="mt-0.5 readout font-medium text-abyss-700 dark:text-mist-100">
             {sensor.ideal[0]}–{sensor.ideal[1]}
           </p>
