@@ -17,27 +17,31 @@ MQTT_BROKER = "localhost"
 MQTT_PORT = 1883
 MQTT_TOPIC = "smartfish/data"
 
-# mapping capteurs
+# mapping capteurs — aligné sur le firmware ESP32 réel :
+# DS18B20 (temperature), analog turbidity module (turbidity),
+# MQ137 (ammonia), Gravity TDS module (tds), LDR (light)
 SENSOR_MAP = {
     "temperature": 1,
     "turbidity": 2,
-    "ph": 3,
-    "oxygen": 4,
-    "water_level": 5
+    "ammonia": 3,
+    "tds": 4,
+    "light": 5
 }
 
-# seuils intelligents
+# seuils intelligents — dérivés des conditions déjà codées dans le firmware
+# (temperatureOK, tdsOK, turbiditeOK, ammoniacOK). Valeurs en unités brutes
+# ADC (0-4095) pour turbidity/ammonia/light tant qu'aucune courbe de
+# calibration n'existe. "light" n'a volontairement aucun seuil : le
+# firmware ne définit pas de plage saine pour la luminosité pour l'instant.
 THRESHOLDS = {
-    "temperature": {"min": 24, "max": 30},
-    "ph": {"min": 6.5, "max": 8.0},
-    "turbidity": {"max": 20},
-    "oxygen": {"min": 5},
-    "water_level": {"min": 20}
+    "temperature": {"min": 20, "max": 30},
+    "turbidity": {"min": 1500},   # NOTE: pour ce module, une valeur BASSE = eau PLUS trouble.
+                                    # L'alerte "too LOW" signifie donc "turbidité physique élevée".
+    "ammonia": {"max": 1500},      # valeur brute MQ137 ; plus haut = plus d'ammoniac détecté
+    "tds": {"min": 100, "max": 1000},
+    # "light": pas de seuil pour l'instant — à calibrer une fois des
+    # relevés réels observés en conditions d'installation.
 }
-
-# Captured once at FastAPI startup, used to schedule broadcasts from the
-# MQTT thread onto the asyncio event loop. None until start_mqtt() runs.
-_event_loop: Optional[asyncio.AbstractEventLoop] = None
 
 
 # -----------------------------
@@ -53,9 +57,6 @@ def create_alert(db, sensor_id, level, message, value) -> dict:
     db.add(alert)
     print(f"🚨 ALERT [{level}] -> {message} | value={value}")
 
-    # Returned separately from the ORM object: broadcasting needs plain
-    # values before commit() (the ORM object's server-generated fields
-    # like created_at aren't populated until after commit + refresh).
     return {
         "sensor_id": sensor_id,
         "level": level,
@@ -93,16 +94,13 @@ def check_alert(key, value, sensor_id, db) -> List[dict]:
     return created
 
 
+_event_loop: Optional[asyncio.AbstractEventLoop] = None
+
+
 def _schedule_broadcast(message: dict) -> None:
-    """
-    Schedule manager.broadcast(message) onto the FastAPI event loop from
-    the MQTT thread. No-op (with a warning) if the loop hasn't been
-    captured yet — e.g. a message arrives before startup finishes.
-    """
     if _event_loop is None:
         logger.warning("Event loop not ready yet, dropping broadcast: %s", message)
         return
-
     asyncio.run_coroutine_threadsafe(manager.broadcast(message), _event_loop)
 
 
@@ -127,9 +125,6 @@ def on_message(client, userdata, msg):
         measurement_payloads: List[dict] = []
         alert_payloads: List[dict] = []
 
-        # -------------------------
-        # 1. SAVE MEASUREMENTS
-        # -------------------------
         for key, sensor_id in SENSOR_MAP.items():
             if key in data:
                 value = data[key]
@@ -148,17 +143,11 @@ def on_message(client, userdata, msg):
                     "recorded_at": datetime.now(timezone.utc).isoformat(),
                 })
 
-                # -------------------------
-                # 2. CHECK ALERTS
-                # -------------------------
                 alert_payloads.extend(check_alert(key, value, sensor_id, db))
 
         db.commit()
         print("Snapshot processed ✔")
 
-        # -------------------------
-        # 3. BROADCAST TO WEBSOCKET CLIENTS
-        # -------------------------
         if measurement_payloads:
             _schedule_broadcast({"type": "measurement_update", "data": measurement_payloads})
         if alert_payloads:
@@ -172,9 +161,6 @@ def on_message(client, userdata, msg):
             db.close()
 
 
-# -----------------------------
-# START MQTT
-# -----------------------------
 def start_mqtt(loop: Optional[asyncio.AbstractEventLoop] = None):
     global _event_loop
     _event_loop = loop

@@ -78,3 +78,16 @@ export default function Profile() {
     </div>
   )
 }
+function ProfileField({ icon: Icon, label, value }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mist-100 dark:bg-abyss-800 text-abyss-500 dark:text-mist-200/50">
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      <div className="min-w-0">
+        <dt className="eyebrow">{label}</dt>
+        <dd className="mt-0.5 truncate text-sm font-medium text-abyss-800 dark:text-mist-50">{value}</dd>
+      </div>
+    </div>
+  )
+}
