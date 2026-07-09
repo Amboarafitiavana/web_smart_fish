@@ -7,8 +7,6 @@ export const SENSOR_ICONS = {
   wind: FiWind,
   sun: FiSun,
   tds: GiWaterDrop,
-  // Conservées pour compatibilité avec utils/mockData.js (page Sensors,
-  // toujours sur données simulées, indépendante des vrais capteurs ESP32)
   flask: GiWaterDrop,
   waves: GiWaveCrest,
 }
