@@ -33,3 +33,20 @@ class UserResponse(UserBase):
 
     id: int
     created_at: datetime
+    
+class RegisterRequest(BaseModel):
+    """Public registration payload — role is intentionally omitted
+    to prevent self-assignment of admin privileges."""
+    fullname: str = Field(..., min_length=2, max_length=100)
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=128)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

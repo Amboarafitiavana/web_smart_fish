@@ -41,6 +41,13 @@ class Settings:
         self.DB_USER: str = self._require("DB_USER")
         self.DB_PASSWORD: str = self._require("DB_PASSWORD")
         self.DB_NAME: str = self._require("DB_NAME")
+        
+           # --- JWT ---
+        self.JWT_SECRET_KEY: str = self._require("JWT_SECRET_KEY")
+        self.JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+        self.JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
+            os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+        )
 
         # --- CORS ---
         raw_origins = os.getenv("CORS_ORIGINS", "")
