@@ -6,11 +6,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import SearchInput from '../ui/SearchInput'
 import ConnectionStatusBadge from './ConnectionStatusBadge'
-import { ALERTS, USER } from '../../utils/mockData'
+import { ALERTS} from '../../utils/mockData'
 
 export default function Navbar({ onOpenMobileSidebar }) {
   const { theme, toggleTheme } = useTheme()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const { t } = useLanguage()
   const [search, setSearch] = useState('')
   const [notifOpen, setNotifOpen] = useState(false)
@@ -26,6 +26,13 @@ export default function Navbar({ onOpenMobileSidebar }) {
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
+  
+  const initials = user?.fullname
+  ?.split(' ')
+  .map((w) => w[0])
+  .slice(0, 2)
+  .join('')
+  .toUpperCase() || '?'
 
   const openAlerts = ALERTS.filter((a) => a.status === 'Open' || a.status === 'Monitoring').slice(0, 4)
 
@@ -84,10 +91,10 @@ export default function Navbar({ onOpenMobileSidebar }) {
         <div className="relative" ref={menuRef}>
           <button onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 hover:bg-mist-100 dark:hover:bg-abyss-800">
             <span className="flex h-7.5 w-7.5 h-[30px] w-[30px] items-center justify-center rounded-full bg-gradient-to-br from-current-500 to-signal-500 text-xs font-semibold text-white">
-              {USER.avatar}
+              {initials}
             </span>
             <span className="hidden text-left md:block">
-              <span className="block text-sm font-medium leading-tight text-abyss-800 dark:text-mist-50">{USER.name.split(' ')[0]}</span>
+              <span className="block text-sm font-medium leading-tight text-abyss-800 dark:text-mist-50">{user.fullname.split(' ')[0]}</span>
             </span>
           </button>
           {menuOpen && (

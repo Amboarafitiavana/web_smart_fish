@@ -6,6 +6,8 @@ from app.api.deps import get_db
 from app.core.security import create_access_token, verify_password, hash_password
 from app.models.user import User, UserRole
 from app.schemas.user import RegisterRequest, LoginRequest, Token, UserResponse
+from app.api.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -38,3 +40,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> Token:
         )
     token = create_access_token(subject=user.id, extra_claims={"role": user.role.value})
     return Token(access_token=token)
+
+@router.get("/me", response_model=UserResponse)
+def me(current_user: User = Depends(get_current_user)) -> UserResponse:
+    return current_user

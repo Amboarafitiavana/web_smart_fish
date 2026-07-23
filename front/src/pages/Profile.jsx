@@ -1,22 +1,27 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiMail, FiShield, FiMapPin, FiCalendar } from 'react-icons/fi'
-import { USER, PONDS } from '../utils/mockData'
-import { Label, Input } from '../components/ui/Field'
+import {FiShield, FiMapPin, FiCalendar } from 'react-icons/fi'
+import {PONDS } from '../utils/mockData'
+// import { Label, Input } from '../components/ui/Field'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Profile() {
   const { t } = useLanguage()
   const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(USER.name)
-  const [email, setEmail] = useState(USER.email)
-
+  const {user} = useAuth()
   const handleSave = () => {
     setEditing(false)
     toast.success(t('profilePage.profileUpdated'))
   }
+  const initials = user?.fullname
+  ?.split(' ')
+  .map((w) => w[0])
+  .slice(0, 2)
+  .join('')
+  .toUpperCase() || '?'
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -28,11 +33,11 @@ export default function Profile() {
       <div className="panel p-6">
         <div className="flex flex-col items-center gap-4 border-b border-mist-100 dark:border-abyss-800 pb-6 sm:flex-row">
           <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-current-500 to-signal-500 font-display text-2xl font-bold text-white shadow-glow">
-            {USER.avatar}
+            {initials}
           </span>
           <div className="text-center sm:text-left">
-            <h2 className="font-display text-lg font-semibold text-abyss-900 dark:text-mist-50">{name}</h2>
-            <p className="text-sm text-abyss-500 dark:text-mist-200/50">{USER.role}</p>
+            <h2 className="font-display text-lg font-semibold text-abyss-900 dark:text-mist-50">{user.fullname}</h2>
+            <p className="text-sm text-abyss-500 dark:text-mist-200/50">{user.role}</p>
           </div>
           <Button variant="ghost" className="sm:ml-auto" onClick={() => setEditing(true)}>
             {t('profilePage.editProfile')}
@@ -40,10 +45,9 @@ export default function Profile() {
         </div>
 
         <dl className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <ProfileField icon={FiMail} label={t('profilePage.email')} value={email} />
-          <ProfileField icon={FiShield} label={t('profilePage.role')} value={USER.role} />
+          <ProfileField icon={FiShield} label={t('profilePage.role')} value={user.role} />
           <ProfileField icon={FiMapPin} label={t('profilePage.pondsManaged')} value={PONDS.map((p) => p.name.split('—')[0].trim()).join(', ')} />
-          <ProfileField icon={FiCalendar} label={t('profilePage.memberSince')} value="March 2025" />
+          <ProfileField icon={FiCalendar} label={t('profilePage.memberSince')} value={user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : '—'} />
         </dl>
       </div>
 
@@ -64,16 +68,16 @@ export default function Profile() {
           </>
         }
       >
-        <div className="space-y-4">
+        {/* <div className="space-y-4">
           <div>
             <Label htmlFor="name">{t('profilePage.fullName')}</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input id="name" value={user.fullname} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
             <Label htmlFor="pemail">{t('profilePage.email')}</Label>
-            <Input id="pemail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input id="pemail" type="email" value={user.email} onChange={(e) => setEmail(e.target.value)} />
           </div>
-        </div>
+        </div> */}
       </Modal>
     </div>
   )

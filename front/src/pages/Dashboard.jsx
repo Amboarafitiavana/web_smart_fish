@@ -39,7 +39,7 @@ export default function Dashboard() {
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-white/70">{formatDate(now)}</p>
           <h1 className="mt-1 font-display text-2xl font-bold sm:text-3xl">
-            {t('dashboard.welcomeBack', { name: user?.name?.split(' ')[0] || 'Operator' })}
+            {t('dashboard.welcomeBack', { name: user?.fullname?.split(' ')[0] || 'Operator' })}
           </h1>
           <p className="mt-1.5 text-sm text-white/80">
             {t('dashboard.liveMonitoring', { count: sensors.length || 5, online: onlineDevices, total: DEVICES.length })}

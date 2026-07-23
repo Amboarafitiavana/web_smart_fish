@@ -10,7 +10,7 @@ import Button from '../components/ui/Button'
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('rakoto@smartfish.io')
+  const [email, setEmail] = useState('user@smartfish.io')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [loading, setLoading] = useState(false)

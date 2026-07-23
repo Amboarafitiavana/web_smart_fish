@@ -1,26 +1,40 @@
-import { createContext, useContext, useState } from 'react'
-import { USER } from '../utils/mockData'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { authService } from '../services/authService'
 
 const AuthContext = createContext(null)
+const TOKEN_KEY = 'smartfish-token'
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => (localStorage.getItem('smartfish-auth') ? USER : null))
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = async (_email, _password) => {
-    // Frontend-only stub. Swap for services/auth.js once the API exists.
-    await new Promise((r) => setTimeout(r, 700))
-    localStorage.setItem('smartfish-auth', '1')
-    setUser(USER)
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (!token) {
+      setLoading(false)
+      return
+    }
+    authService.me()
+      .then((res) => setUser(res.data))
+      .catch(() => localStorage.removeItem(TOKEN_KEY))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const login = async (email, password) => {
+    const res = await authService.login(email, password)
+    localStorage.setItem(TOKEN_KEY, res.data.access_token)
+    const me = await authService.me()
+    setUser(me.data)
     return true
   }
 
   const logout = () => {
-    localStorage.removeItem('smartfish-auth')
+    localStorage.removeItem(TOKEN_KEY)
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   )
